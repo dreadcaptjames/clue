@@ -15,7 +15,7 @@
   <script>
     try {
       const savedTheme = localStorage.getItem('clue_ledger_theme_v1');
-      if (['midnight','manor','velvet','blueprint'].includes(savedTheme)) document.documentElement.dataset.theme = savedTheme;
+      if (['midnight','manor','velvet','blueprint','mansion'].includes(savedTheme)) document.documentElement.dataset.theme = savedTheme;
     } catch(err) { /* Private browsing or locked storage: use the classic theme. */ }
   </script>
   <style>
@@ -191,6 +191,40 @@
   --theme-input-ink:#1a3a57; --theme-toast:#173d67; --theme-toast-ink:#fff;
   --theme-save:#257761; --theme-save-dot:#257761;
 }
+/* Inspired by the actual Clue board: slate frame, lamplit walnut rooms, ivory hall tiles. */
+:root[data-theme="mansion"] {
+  --cream:#c7b9a7; --paper:#f7f0e4; --ink:#2e2a28; --muted:#675d53; --line:#ae9a84;
+  --gold:#b07a39; --burgundy:#a74340; --teal:#34705b; --amber:#94601f;
+  --shadow:0 14px 34px rgba(41,30,25,.18);
+  --theme-header:#23252a; --theme-header-text:#fff6e7; --theme-header-accent:#efc37b; --theme-header-sub:#e4d0b9;
+  --theme-panel:#faf5e9; --theme-alt:#f0e7d8; --theme-edge:#87735f; --theme-divider:#c1b09a;
+  --theme-strong-edge:#a18a72; --theme-muted:#6e5d50; --theme-faint:#786b60;
+  --theme-controls:#fff7ec; --theme-controls-hover:#ecddc9; --theme-control-text:#3c3029;
+  --theme-grid-head:#dfcdb5; --theme-section:#713c2a; --theme-section-ink:#fff2dc;
+  --theme-field:#e6d3b6; --theme-field-ink:#603e28; --theme-note-rule:#ddcbb3;
+  --theme-x-bg:#f5ddd5; --theme-check-bg:#e0eee0; --theme-question-bg:#f9e8cb;
+  --theme-button:#713c2a; --theme-button-ink:#fff5e6; --theme-button-hover:#955238;
+  --theme-input-ink:#332b26; --theme-toast:#26252a; --theme-toast-ink:#ffebcc;
+  --theme-save:#316a49; --theme-save-dot:#3e7751;
+}
+:root[data-theme="mansion"] body {
+  background-color:#c7b9a7;
+  background-image:linear-gradient(rgba(63,55,55,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(63,55,55,.10) 1px,transparent 1px),radial-gradient(ellipse at 60% 0%,#e5d7c5,#c5b7a4 85%);
+  background-size:46px 46px,46px 46px,auto;
+}
+:root[data-theme="mansion"] .masthead {
+  background-image:radial-gradient(circle at 88% 8%,rgba(241,170,83,.25),transparent 35%),repeating-linear-gradient(110deg,rgba(177,99,59,.065) 0 2px,transparent 2px 17px),linear-gradient(100deg,#22252a 5%,#342b2a 52%,#563a2f 100%);
+  border-bottom:3px solid #b28b53;
+}
+:root[data-theme="mansion"] .sheet,
+:root[data-theme="mansion"] .notes,
+:root[data-theme="mansion"] .theme-panel { box-shadow:inset 0 0 0 2px rgba(139,106,69,.13),var(--shadow); }
+:root[data-theme="mansion"] tbody .section-row th {
+  background-image:repeating-linear-gradient(96deg,rgba(255,211,146,.055) 0px,rgba(255,211,146,.055) 2px,transparent 3px,transparent 19px);
+  border-bottom:2px solid #b68a53;
+}
+:root[data-theme="mansion"] .section-row th .section-count { color:#f0d4ab; }
+:root[data-theme="mansion"] .theme-choice[aria-pressed="true"] { border-color:#a97639; }
 /* Legacy application surfaces, now driven by one unified palette. */
 .masthead { background:var(--theme-header); color:var(--theme-header-text); }
 .brand-kicker,.brand-title em,.seal-inner { color:var(--theme-header-accent); }
@@ -255,6 +289,7 @@ details summary { color:var(--theme-control-text); border-color:var(--theme-stro
 .theme-swatch--manor { --preview-cover:#234431; --preview-paper:#eff5e6; --preview-line:#9fb9a0; }
 .theme-swatch--velvet { --preview-cover:#5a2741; --preview-paper:#fbebf0; --preview-line:#cba4b2; }
 .theme-swatch--blueprint { --preview-cover:#1a497c; --preview-paper:#e9f6ff; --preview-line:#a0cbdf; }
+.theme-swatch--mansion { --preview-cover:#27272c; --preview-paper:#dfcbb0; --preview-line:#94603d; }
 .theme-choice-copy { display:flex; flex-direction:column; gap:3px; min-width:0; }
 .theme-choice-title { font-size:11px; font-weight:850; line-height:1.15; }
 .theme-choice-sub { font-size:10px; color:var(--muted); line-height:1.2; }
@@ -297,6 +332,7 @@ details summary { color:var(--theme-control-text); border-color:var(--theme-stro
         <button class="theme-choice" type="button" data-theme-choice="manor" aria-pressed="false"><span class="theme-swatch theme-swatch--manor" aria-hidden="true"></span><span class="theme-choice-copy"><span class="theme-choice-title">Manor Green</span><span class="theme-choice-sub">Country estate</span></span></button>
         <button class="theme-choice" type="button" data-theme-choice="velvet" aria-pressed="false"><span class="theme-swatch theme-swatch--velvet" aria-hidden="true"></span><span class="theme-choice-copy"><span class="theme-choice-title">Velvet Mystery</span><span class="theme-choice-sub">Burgundy &amp; rose</span></span></button>
         <button class="theme-choice" type="button" data-theme-choice="blueprint" aria-pressed="false"><span class="theme-swatch theme-swatch--blueprint" aria-hidden="true"></span><span class="theme-choice-copy"><span class="theme-choice-title">Blue Evidence</span><span class="theme-choice-sub">Modern blueprint</span></span></button>
+        <button class="theme-choice" type="button" data-theme-choice="mansion" aria-pressed="false"><span class="theme-swatch theme-swatch--mansion" aria-hidden="true"></span><span class="theme-choice-copy"><span class="theme-choice-title">Mansion Board</span><span class="theme-choice-sub">Your game board</span></span></button>
       </div>
     </section>
     <section class="sheet" aria-labelledby="sheetTitle">
@@ -556,7 +592,7 @@ details summary { color:var(--theme-control-text); border-color:var(--theme-stro
 (() => {
   'use strict';
   const STORAGE='clue_ledger_theme_v1';
-  const COLORS={classic:'#22232c',midnight:'#0a121d',manor:'#1d3b2d',velvet:'#50223b',blueprint:'#173d67'};
+  const COLORS={classic:'#22232c',midnight:'#0a121d',manor:'#1d3b2d',velvet:'#50223b',blueprint:'#173d67',mansion:'#23252a'};
   const buttons=Array.from(document.querySelectorAll('[data-theme-choice]'));
   const meta=document.querySelector('meta[name="theme-color"]');
   function selectTheme(name, persist) {
