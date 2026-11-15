@@ -111,6 +111,40 @@
     .menu .danger { color:#a23e4d; }
     .toast { position:fixed; bottom:calc(20px + env(safe-area-inset-bottom,0px)); left:50%; transform:translateX(-50%) translateY(20px); padding:12px 16px; background:#272831; color:white; border-radius:10px; font-size:13px; pointer-events:none; opacity:0; transition:opacity .2s,transform .2s; box-shadow:0 8px 25px rgba(0,0,0,.25); z-index:90; max-width:calc(100vw - 28px); text-align:center; }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+    /* Keep the player labels in view while reading cards further down the case sheet.
+       An independent mirrored header is needed because the grid scrolls sideways on iPad. */
+    .pinned-players {
+      position: fixed;
+      top: env(safe-area-inset-top, 0px);
+      left: 0;
+      display: block;
+      overflow-x: auto;
+      overflow-y: hidden;
+      z-index: 80;
+      pointer-events: auto;
+      overscroll-behavior-x: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      background: var(--theme-grid-head);
+      box-shadow: 0 4px 14px rgba(30, 27, 26, .18);
+      border-bottom: 2px solid var(--theme-strong-edge);
+    }
+    .pinned-players::-webkit-scrollbar { display: none; }
+    .pinned-players[hidden] { display: none; }
+    .pinned-players-table { margin: 0; }
+    .pinned-players-table thead th { position: static; }
+    .pinned-player-name {
+      display: block;
+      width: 100%;
+      min-height: 33px;
+      padding: 7px 3px;
+      line-height: 19px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .pinned-player-name.is-placeholder { color: var(--theme-faint); }
     .sr-only { position:absolute; width:1px;height:1px; padding:0; margin:-1px;overflow:hidden; clip:rect(0,0,0,0);white-space:nowrap;border:0; }
     @media(max-width:760px) { .masthead { padding:24px 20px; } main { padding:17px 12px 70px; } .sheet-intro { padding:18px 16px; } .toolbar { padding:11px 12px; gap:7px; } .tools { gap:5px; } .toolbar-tip { display:none; } .mark-tool { padding:7px 9px; } .mark-tool .text-label { display:none; } .mark-tool .glyph { width:auto; font-size:23px; } .toolbar-label { display:none; } .clue-row th { padding-left:14px; font-size:13px; } thead th:first-child { padding-left:14px; } tbody .section-row th { padding-left:14px; } .save-indicator { min-height:20px; } .sheet-footer { padding:14px; } .seal { width:56px; height:56px; }.seal-inner { height:46px; width:46px; font-size:24px; } }
     @media (max-width:440px) { .brand-sub { max-width:270px; line-height:1.35; } .brand-title { font-size:32px; } .seal { display:none; } table { min-width:665px; } col.label-col { width:27%; } .control-panel { align-items:flex-start; } }
@@ -386,6 +420,7 @@ details summary { color:var(--theme-control-text); border-color:var(--theme-stro
       <input type="file" id="restoreInput" accept=".json,application/json" class="sr-only" aria-label="Select backup JSON">
     </footer>
   </main>
+  <div id="pinnedPlayers" class="pinned-players" hidden aria-hidden="true"></div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
   (() => {
@@ -482,6 +517,7 @@ details summary { color:var(--theme-control-text); border-color:var(--theme-stro
       tbody.replaceChildren(frag);
       document.querySelectorAll('.player-input').forEach(input=>input.value=game.names[Number(input.dataset.player)]);
       $('notesInput').value=game.notes;
+      document.dispatchEvent(new Event('clue:grid-rendered'));
       updateCount();
     }
     function renderGamePicker() {
@@ -606,6 +642,79 @@ details summary { color:var(--theme-control-text); border-color:var(--theme-stro
   buttons.forEach(button=>button.addEventListener('click',()=>selectTheme(button.dataset.themeChoice,true)));
 })();
 
+  </script>
+
+  <script>
+  // Mirrors the existing column header at the viewport edge when the sheet is scrolled.
+  // It is presentation-only: player names still edit in the original header.
+  (() => {
+    'use strict';
+    const scroller = document.querySelector('.grid-scroll');
+    const sourceTable = document.getElementById('clueTable');
+    const originalHead = sourceTable?.tHead;
+    const fixedHeader = document.getElementById('pinnedPlayers');
+    const columns = sourceTable?.querySelector('colgroup');
+    if (!scroller || !originalHead || !fixedHeader || !columns) return;
+
+    const duplicateTable = document.createElement('table');
+    duplicateTable.className = 'pinned-players-table';
+    duplicateTable.append(columns.cloneNode(true));
+    const duplicateHead = originalHead.cloneNode(true);
+    duplicateHead.querySelectorAll('input.player-input').forEach(input => {
+      const name = document.createElement('span');
+      name.className = 'player-input pinned-player-name';
+      name.textContent = 'Name';
+      input.replaceWith(name);
+    });
+    duplicateTable.append(duplicateHead);
+    fixedHeader.append(duplicateTable);
+
+    const inputs = Array.from(originalHead.querySelectorAll('input.player-input'));
+    const names = Array.from(duplicateHead.querySelectorAll('.pinned-player-name'));
+    function updateNames() {
+      names.forEach((span, index) => {
+        const label = inputs[index]?.value || '';
+        span.textContent = label || 'Name';
+        span.classList.toggle('is-placeholder', !label);
+      });
+    }
+
+    let frameQueued = false;
+    function positionHeader() {
+      frameQueued = false;
+      const bounds = scroller.getBoundingClientRect();
+      const head = originalHead.getBoundingClientRect();
+      const offsetTop = parseFloat(getComputedStyle(fixedHeader).top) || 0;
+      // Only pin while the clue grid passes underneath; never cover the notes.
+      const show = head.bottom <= offsetTop && bounds.bottom > offsetTop + head.height;
+      if (!show) { fixedHeader.hidden = true; return; }
+      fixedHeader.hidden = false;
+      fixedHeader.style.left = `${bounds.left}px`;
+      fixedHeader.style.width = `${bounds.width}px`;
+      duplicateTable.style.width = `${sourceTable.getBoundingClientRect().width}px`;
+      fixedHeader.scrollLeft = scroller.scrollLeft;
+    }
+    function scheduleUpdate() {
+      if (frameQueued) return;
+      frameQueued = true;
+      requestAnimationFrame(positionHeader);
+    }
+    scroller.addEventListener('scroll', scheduleUpdate, {passive:true});
+    window.addEventListener('scroll', scheduleUpdate, {passive:true});
+    window.addEventListener('resize', scheduleUpdate);
+    window.visualViewport?.addEventListener('resize', scheduleUpdate);
+    originalHead.addEventListener('input', () => { updateNames(); scheduleUpdate(); });
+    document.addEventListener('clue:grid-rendered', () => { updateNames(); scheduleUpdate(); });
+    // Swiping the locked name row sideways also moves the main grid.
+    fixedHeader.addEventListener('scroll', () => {
+      if (Math.abs(scroller.scrollLeft - fixedHeader.scrollLeft) > 0.5) {
+        scroller.scrollLeft = fixedHeader.scrollLeft;
+      }
+    }, {passive:true});
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) scheduleUpdate(); });
+    updateNames();
+    positionHeader();
+  })();
   </script>
 </body>
 </html>
