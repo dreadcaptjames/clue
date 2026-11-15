@@ -12,6 +12,12 @@
   <link rel="icon" type="image/png" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-192.png">
   <title>Case Notes · Clue Detective Sheet</title>
+  <script>
+    try {
+      const savedTheme = localStorage.getItem('clue_ledger_theme_v1');
+      if (['midnight','manor','velvet','blueprint'].includes(savedTheme)) document.documentElement.dataset.theme = savedTheme;
+    } catch(err) { /* Private browsing or locked storage: use the classic theme. */ }
+  </script>
   <style>
     :root { color-scheme: light; --ink:#22232c; --muted:#72737a; --paper:#fffdfa; --cream:#f5f1ea; --line:#dedbd4; --gold:#b49052; --burgundy:#8f364e; --teal:#267e75; --amber:#a26c22; --shadow:0 12px 38px rgba(27,26,29,.085); }
     *,*::before,*::after { box-sizing:border-box }
@@ -110,6 +116,152 @@
     @media (max-width:440px) { .brand-sub { max-width:270px; line-height:1.35; } .brand-title { font-size:32px; } .seal { display:none; } table { min-width:665px; } col.label-col { width:27%; } .control-panel { align-items:flex-start; } }
     @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important; transition-duration:.01ms!important; scroll-behavior:auto!important; } }
   </style>
+  <style>
+/* The Clue Ledger: selectable visual themes. Keep contrast and evidence marks legible. */
+:root {
+  --theme-header:#22232c; --theme-header-text:#fffdfa; --theme-header-accent:#e1bf85; --theme-header-sub:#c9c8cc;
+  --theme-panel:#fffdfa; --theme-alt:#fdfbf7; --theme-edge:#e4dfd5; --theme-divider:#eae7e1;
+  --theme-strong-edge:#cfcac0; --theme-muted:#736a5f; --theme-faint:#837b71;
+  --theme-controls:#fffdfa; --theme-controls-hover:#f5f1e9; --theme-control-text:#2e2b2c;
+  --theme-grid-head:#f0ede7; --theme-section:#e9e5dc; --theme-section-ink:#605751;
+  --theme-field:#f6f3ed; --theme-field-ink:#716b60; --theme-note-rule:#e7e4dd;
+  --theme-x-bg:#f6e8ec; --theme-check-bg:#e7f3ef; --theme-question-bg:#fff3dd;
+  --theme-button:#22232c; --theme-button-ink:#fffdfa; --theme-button-hover:#3b3c48;
+  --theme-input-ink:#25242c; --theme-toast:#272831; --theme-toast-ink:#fff;
+  --theme-save:#567b5d; --theme-save-dot:#558c67;
+}
+:root[data-theme="midnight"] {
+  color-scheme:dark;
+  --cream:#101923; --paper:#1a2633; --ink:#ecf0f5; --muted:#b9c3cf; --line:#405166;
+  --gold:#eac58e; --burgundy:#ff93a8; --teal:#85d9b7; --amber:#f4d18e;
+  --shadow:0 12px 36px rgba(0,0,0,.33);
+  --theme-header:#0a121d; --theme-header-text:#f5f4f0; --theme-header-accent:#ebc58d; --theme-header-sub:#b6c2ce;
+  --theme-panel:#1a2633; --theme-alt:#1e2c3a; --theme-edge:#37485b; --theme-divider:#36485a;
+  --theme-strong-edge:#526277; --theme-muted:#bec7d1; --theme-faint:#aab5c3;
+  --theme-controls:#243444; --theme-controls-hover:#2f4255; --theme-control-text:#f1f4f6;
+  --theme-grid-head:#26384a; --theme-section:#304256; --theme-section-ink:#e6ebf0;
+  --theme-field:#243445; --theme-field-ink:#e4ebf1; --theme-note-rule:#3a4c60;
+  --theme-x-bg:#4f2b40; --theme-check-bg:#1e493f; --theme-question-bg:#4a3a27;
+  --theme-button:#eac58e; --theme-button-ink:#181b22; --theme-button-hover:#f5dcb2;
+  --theme-input-ink:#f5f6f6; --theme-toast:#eac58e; --theme-toast-ink:#181b22;
+  --theme-save:#9bddbc; --theme-save-dot:#7fcca6;
+}
+:root[data-theme="manor"] {
+  --cream:#e7ecdf; --paper:#fafbf5; --ink:#203c2d; --muted:#5e7162; --line:#cbd6c6;
+  --gold:#b28c48; --burgundy:#a54254; --teal:#277564; --amber:#966a24;
+  --shadow:0 12px 34px rgba(25,54,31,.12);
+  --theme-header:#1d3b2d; --theme-header-text:#fafaf0; --theme-header-accent:#d9b975; --theme-header-sub:#d0e0d0;
+  --theme-panel:#fafbf5; --theme-alt:#f2f7ed; --theme-edge:#ccd9c8; --theme-divider:#d2ddce;
+  --theme-strong-edge:#b0c4ad; --theme-muted:#506953; --theme-faint:#627766;
+  --theme-controls:#fbfcf8; --theme-controls-hover:#edf4e9; --theme-control-text:#253a2c;
+  --theme-grid-head:#e3eddd; --theme-section:#d9e8d3; --theme-section-ink:#35503e;
+  --theme-field:#e6f0df; --theme-field-ink:#486750; --theme-note-rule:#d8e4d3;
+  --theme-x-bg:#f5e7e7; --theme-check-bg:#e0f1e7; --theme-question-bg:#fff3d9;
+  --theme-button:#24533c; --theme-button-ink:#fffef6; --theme-button-hover:#326e50;
+  --theme-input-ink:#203c2d; --theme-toast:#24533c; --theme-toast-ink:#fffef6;
+  --theme-save:#317b51; --theme-save-dot:#317b51;
+}
+:root[data-theme="velvet"] {
+  --cream:#f4e9ec; --paper:#fff9fa; --ink:#422937; --muted:#816872; --line:#e2d0d7;
+  --gold:#b4865c; --burgundy:#a43257; --teal:#337b71; --amber:#9b6527;
+  --shadow:0 12px 34px rgba(95,28,57,.12);
+  --theme-header:#50223b; --theme-header-text:#fff5f7; --theme-header-accent:#edc4a0; --theme-header-sub:#e8cbd6;
+  --theme-panel:#fff9fa; --theme-alt:#fdf2f5; --theme-edge:#e6d3db; --theme-divider:#e9d6dd;
+  --theme-strong-edge:#d5b8c4; --theme-muted:#84606f; --theme-faint:#8d6f7c;
+  --theme-controls:#fff9fa; --theme-controls-hover:#faedf2; --theme-control-text:#4f2a3b;
+  --theme-grid-head:#f5e1e9; --theme-section:#ecd3de; --theme-section-ink:#693a51;
+  --theme-field:#f9ebf0; --theme-field-ink:#745365; --theme-note-rule:#eedce3;
+  --theme-x-bg:#f8dee7; --theme-check-bg:#e1f1ed; --theme-question-bg:#f9ebd7;
+  --theme-button:#843450; --theme-button-ink:#fff9fa; --theme-button-hover:#a34364;
+  --theme-input-ink:#4d2b3b; --theme-toast:#602d44; --theme-toast-ink:#fff9fa;
+  --theme-save:#3e7d68; --theme-save-dot:#3e7d68;
+}
+:root[data-theme="blueprint"] {
+  --cream:#e9f3fa; --paper:#fbfdff; --ink:#203c59; --muted:#5d7690; --line:#cadce9;
+  --gold:#e0a860; --burgundy:#ac385d; --teal:#177f91; --amber:#956119;
+  --shadow:0 12px 34px rgba(22,62,99,.12);
+  --theme-header:#173d67; --theme-header-text:#f7fcff; --theme-header-accent:#b5defc; --theme-header-sub:#c7e0f4;
+  --theme-panel:#fbfdff; --theme-alt:#f1f8fd; --theme-edge:#c9dce9; --theme-divider:#d0e1ec;
+  --theme-strong-edge:#abc9de; --theme-muted:#506d85; --theme-faint:#667f93;
+  --theme-controls:#fbfdff; --theme-controls-hover:#e7f2fb; --theme-control-text:#1d4261;
+  --theme-grid-head:#e1eff8; --theme-section:#d4e7f3; --theme-section-ink:#375a76;
+  --theme-field:#e8f4fc; --theme-field-ink:#476b87; --theme-note-rule:#d4e8f3;
+  --theme-x-bg:#f8e6ec; --theme-check-bg:#e0f3f2; --theme-question-bg:#fff0d7;
+  --theme-button:#1c5c90; --theme-button-ink:#fff; --theme-button-hover:#2875ad;
+  --theme-input-ink:#1a3a57; --theme-toast:#173d67; --theme-toast-ink:#fff;
+  --theme-save:#257761; --theme-save-dot:#257761;
+}
+/* Legacy application surfaces, now driven by one unified palette. */
+.masthead { background:var(--theme-header); color:var(--theme-header-text); }
+.brand-kicker,.brand-title em,.seal-inner { color:var(--theme-header-accent); }
+.brand-sub { color:var(--theme-header-sub); }
+.seal,.seal-inner { border-color:var(--theme-header-accent); }
+.control-panel .minihead,.toolbar-label { color:var(--theme-muted); }
+select,.plain-button { background:var(--theme-controls); color:var(--theme-control-text); border-color:var(--theme-strong-edge); }
+.plain-button:hover { background:var(--theme-controls-hover); }
+.primary-button { background:var(--theme-button); color:var(--theme-button-ink); border-color:var(--theme-button); }
+.primary-button:hover { background:var(--theme-button-hover); }
+.save-indicator { color:var(--theme-save); }
+.save-indicator:before { background:var(--theme-save-dot); }
+.sheet,.notes { background:var(--paper); border-color:var(--theme-edge); }
+.sheet-intro,.sheet-footer { border-color:var(--theme-divider); }
+.stat { background:var(--theme-field); color:var(--theme-field-ink); }
+.toolbar { background:var(--theme-panel); border-color:var(--theme-edge); }
+.mark-tool { background:var(--theme-controls); color:var(--theme-control-text); border-color:var(--theme-divider); }
+.mark-tool.active { background:var(--theme-button); color:var(--theme-button-ink); border-color:var(--theme-button); box-shadow:0 0 0 1px var(--theme-button); }
+.mark-tool.active .glyph { color:var(--theme-button-ink); }
+.undo-btn { color:var(--theme-muted); }
+.undo-btn:disabled { color:var(--theme-faint); opacity:.6; }
+.toolbar-tip,.notes-header span { color:var(--theme-faint); }
+thead th { background:var(--theme-grid-head); border-color:var(--theme-strong-edge) var(--theme-divider) var(--theme-strong-edge) var(--theme-divider); }
+thead th:first-child,.player-number { color:var(--theme-muted); }
+.player-input { color:var(--theme-input-ink); }
+.player-input::placeholder { color:var(--theme-faint); }
+tbody .section-row th { background:var(--theme-section); border-color:var(--theme-strong-edge); color:var(--theme-section-ink); }
+.section-row th .section-count { color:var(--theme-muted); }
+.clue-row th,.clue-row td { background:var(--theme-panel); border-color:var(--theme-divider); }
+.clue-row:nth-of-type(odd) th,.clue-row:nth-of-type(odd) td { background:var(--theme-alt); }
+.cell-button:hover { background:var(--theme-controls-hover); }
+.cell-button[data-mark="x"] { color:var(--burgundy); background:var(--theme-x-bg); }
+.cell-button[data-mark="check"] { color:var(--teal); background:var(--theme-check-bg); }
+.cell-button[data-mark="question"] { color:var(--amber); background:var(--theme-question-bg); }
+.sheet-footer,.privacy-copy { color:var(--theme-faint); }
+#notesInput { color:var(--ink); border-color:var(--theme-divider); background:repeating-linear-gradient(var(--theme-panel) 0px,var(--theme-panel) 31px,var(--theme-note-rule) 32px); background-size:100% 32px; }
+details summary { color:var(--theme-control-text); border-color:var(--theme-strong-edge); background:var(--theme-controls); }
+.menu { background:var(--theme-panel); border-color:var(--theme-divider); }
+.menu button { color:var(--theme-control-text); }
+.menu button:hover { background:var(--theme-controls-hover); }
+.menu .danger { color:var(--burgundy); }
+.toast { background:var(--theme-toast); color:var(--theme-toast-ink); }
+:root[data-theme="midnight"] .masthead { background-image:radial-gradient(circle at 80% -55%,#294259 0,transparent 54%); }
+:root[data-theme="manor"] .masthead { background-image:radial-gradient(circle at 80% -55%,#42674d 0,transparent 54%); }
+:root[data-theme="velvet"] .masthead { background-image:radial-gradient(circle at 80% -55%,#7b3558 0,transparent 54%); }
+:root[data-theme="blueprint"] .masthead { background-image:linear-gradient(130deg,rgba(255,255,255,.07) 1px,transparent 1px); background-size:25px 25px; }
+:root[data-theme="blueprint"] .brand-title { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; letter-spacing:-.055em; font-weight:850; }
+/* Theme picker — reachable by touch, keyboard, and assistive technology. */
+.theme-panel { display:grid; grid-template-columns:minmax(145px,184px) minmax(0,1fr); align-items:center; gap:16px; padding:13px 15px; margin:0 0 20px; background:var(--paper); border:1px solid var(--theme-edge); border-radius:14px; box-shadow:var(--shadow); }
+.theme-overline { display:block; font-size:10px; font-weight:850; letter-spacing:.17em; text-transform:uppercase; color:var(--burgundy); margin-bottom:3px; }
+.theme-panel h2 { font-family:Georgia,serif; font-size:20px; margin:0; letter-spacing:-.025em; }
+.theme-panel p { margin:4px 0 0; font-size:11px; color:var(--muted); line-height:1.4; }
+.theme-choices { display:flex; align-items:stretch; gap:8px; overflow-x:auto; overscroll-behavior-x:contain; padding:3px 2px 5px; scrollbar-width:thin; -webkit-overflow-scrolling:touch; }
+.theme-choice { flex:1 0 124px; min-width:124px; min-height:61px; display:flex; align-items:center; gap:9px; padding:7px 9px; background:var(--theme-controls); border:1.5px solid var(--theme-divider); border-radius:10px; color:var(--ink); text-align:left; position:relative; }
+.theme-choice:hover { background:var(--theme-controls-hover); }
+.theme-choice[aria-pressed="true"] { border-color:var(--gold); box-shadow:inset 0 0 0 1px var(--gold); }
+.theme-choice[aria-pressed="true"]::after { content:'✓'; position:absolute; top:3px; right:5px; font-size:11px; line-height:1; color:var(--gold); font-weight:900; }
+.theme-swatch { flex:none; position:relative; display:block; overflow:hidden; width:36px; height:42px; border-radius:5px; border:1px solid rgba(0,0,0,.15); background:linear-gradient(to bottom,var(--preview-cover) 35%,var(--preview-paper) 35%); }
+.theme-swatch::after { content:''; position:absolute; top:21px; left:6px; width:23px; height:2px; border-radius:1px; background:var(--preview-line); box-shadow:0 6px var(--preview-line),0 12px var(--preview-line); }
+.theme-swatch--classic { --preview-cover:#252735; --preview-paper:#f5f1e7; --preview-line:#b6a593; }
+.theme-swatch--midnight { --preview-cover:#0b121d; --preview-paper:#253849; --preview-line:#73909d; }
+.theme-swatch--manor { --preview-cover:#234431; --preview-paper:#eff5e6; --preview-line:#9fb9a0; }
+.theme-swatch--velvet { --preview-cover:#5a2741; --preview-paper:#fbebf0; --preview-line:#cba4b2; }
+.theme-swatch--blueprint { --preview-cover:#1a497c; --preview-paper:#e9f6ff; --preview-line:#a0cbdf; }
+.theme-choice-copy { display:flex; flex-direction:column; gap:3px; min-width:0; }
+.theme-choice-title { font-size:11px; font-weight:850; line-height:1.15; }
+.theme-choice-sub { font-size:10px; color:var(--muted); line-height:1.2; }
+@media(max-width:850px) { .theme-panel { grid-template-columns:1fr; gap:9px; } .theme-panel-header { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; } .theme-panel p { margin:0; } }
+@media(max-width:440px) { .theme-panel { padding:12px; margin-bottom:16px; } .theme-choices { gap:7px; } .theme-choice { flex-basis:131px; } }
+
+  </style>
 </head>
 <body>
   <header class="masthead">
@@ -134,6 +286,19 @@
       </div>
       <div id="saveIndicator" class="save-indicator" role="status" aria-live="polite">Saved on this device</div>
     </div>
+    <section class="theme-panel" aria-labelledby="themeTitle">
+      <div class="theme-panel-header">
+        <div><span class="theme-overline">Personalize your case</span><h2 id="themeTitle">Appearance</h2></div>
+        <p>Choose a look · saved on this device</p>
+      </div>
+      <div class="theme-choices" role="group" aria-label="Choose app theme">
+        <button class="theme-choice" type="button" data-theme-choice="classic" aria-pressed="true"><span class="theme-swatch theme-swatch--classic" aria-hidden="true"></span><span class="theme-choice-copy"><span class="theme-choice-title">Classic Dossier</span><span class="theme-choice-sub">Vintage paper</span></span></button>
+        <button class="theme-choice" type="button" data-theme-choice="midnight" aria-pressed="false"><span class="theme-swatch theme-swatch--midnight" aria-hidden="true"></span><span class="theme-choice-copy"><span class="theme-choice-title">Midnight Noir</span><span class="theme-choice-sub">Dark detective</span></span></button>
+        <button class="theme-choice" type="button" data-theme-choice="manor" aria-pressed="false"><span class="theme-swatch theme-swatch--manor" aria-hidden="true"></span><span class="theme-choice-copy"><span class="theme-choice-title">Manor Green</span><span class="theme-choice-sub">Country estate</span></span></button>
+        <button class="theme-choice" type="button" data-theme-choice="velvet" aria-pressed="false"><span class="theme-swatch theme-swatch--velvet" aria-hidden="true"></span><span class="theme-choice-copy"><span class="theme-choice-title">Velvet Mystery</span><span class="theme-choice-sub">Burgundy &amp; rose</span></span></button>
+        <button class="theme-choice" type="button" data-theme-choice="blueprint" aria-pressed="false"><span class="theme-swatch theme-swatch--blueprint" aria-hidden="true"></span><span class="theme-choice-copy"><span class="theme-choice-title">Blue Evidence</span><span class="theme-choice-sub">Modern blueprint</span></span></button>
+      </div>
+    </section>
     <section class="sheet" aria-labelledby="sheetTitle">
       <div class="sheet-intro">
         <div>
@@ -385,6 +550,26 @@
       window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
     }
   })();
+  </script>
+  <script>
+/* Appearance is a device preference, separate from saved investigations. */
+(() => {
+  'use strict';
+  const STORAGE='clue_ledger_theme_v1';
+  const COLORS={classic:'#22232c',midnight:'#0a121d',manor:'#1d3b2d',velvet:'#50223b',blueprint:'#173d67'};
+  const buttons=Array.from(document.querySelectorAll('[data-theme-choice]'));
+  const meta=document.querySelector('meta[name="theme-color"]');
+  function selectTheme(name, persist) {
+    const theme=Object.hasOwn(COLORS,name)?name:'classic';
+    document.documentElement.dataset.theme=theme;
+    buttons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.themeChoice===theme)));
+    if(meta) meta.setAttribute('content',COLORS[theme]);
+    if(persist){try{localStorage.setItem(STORAGE,theme);}catch(err){console.warn('Theme preference could not be saved',err);}}
+  }
+  selectTheme(document.documentElement.dataset.theme||'classic',false);
+  buttons.forEach(button=>button.addEventListener('click',()=>selectTheme(button.dataset.themeChoice,true)));
+})();
+
   </script>
 </body>
 </html>
